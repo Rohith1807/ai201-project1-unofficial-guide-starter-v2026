@@ -57,27 +57,17 @@ in at least 4 of 5 tries.
 
 ## 4. Something about your chunks
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+At least 80% of retrieved chunks are between 100 and 300 words long.
 
 **Why this target:**
 
-
+<!-- I chose 100 to 300 words because shorter chunks may not provide enough context, while longer chunks may include unnecessary information. The 80% threshold allows for some variation in document structure. -->
 
 ---
 
 ## 5. Your choice
+
+For at least 4 of my 5 test questions, the generated answer contains the expected phrase defined in questions.py.
 
 <!-- YOU WRITE THIS ONE TOO.
 
@@ -91,6 +81,7 @@ in at least 4 of 5 tries.
 
 **Why this target:**
 
+<!-- I chose 4 out of 5 because retrieval systems are not perfect, but the system should successfully answer most questions and include the key information expected from the source documents. -->
 
 
 ---
