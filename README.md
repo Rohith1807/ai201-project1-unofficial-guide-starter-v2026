@@ -145,11 +145,16 @@ a minor injuries unit locally with limited hours.
      visible. Milestone 4. -->
 
 **Question:**
+    ``` 
+    "What is mill building turned into?" 
+    ```
 
 **Answer:**
+    ```
+     Based on the provided documents, the mill building in Brightwater is now a museum (source: `guide_brightwater.md`).
 
-```
-```
+     Sources retrieved: guide_brightwater.md, guide_givens_mill.md
+     ```
 
 **My relevance cutoff:**
 
@@ -161,10 +166,22 @@ a minor injuries unit locally with limited hours.
      here — the table below wants all ten rows.
 
      Milestone 4. -->
+     ```
+     I ran my five in-corpus test questions and the five OUT_OF_SCOPE questions and recorded the best distance for each. The in-corpus questions all landed between 0.370 and 0.586, and the out-of-scope questions all landed between 0.813 and 0.975 — a clean gap with no overlap. I set the cutoff at 0.6 (the starter default), which sits comfortably in that gap: high enough that none of my real questions get refused, low enough that none of the out-of-scope questions get answered.
+     ```
 
 | Question | In corpus? | Best distance |
 |---|---|---|
-|  |  |  |
+| What is mill building turned into? | Yes | 0.484 |
+| What time of the year is Givens Mill closed? | Yes | 0.370 |
+| Where is Marine Terrace located? | Yes | 0.452 |
+| When and what time of the day is hard to find a meal? | Yes | 0.474 |
+| Which place is cycling not recommended? | Yes | 0.586 |
+| What is the capital of Mongolia? | No | 0.827 |
+| How do I change the oil in a diesel engine? | No | 0.903 |
+| Who won the 1994 World Cup? | No | 0.975 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.846 |
+| How do I write a for loop in Rust? | No | 0.813 |
 
 ## How I Used AI
 
