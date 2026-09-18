@@ -36,7 +36,8 @@
 
 ## Chunking Strategy
 
-**Chunk size:** Not a fixed size — chunks follow the document's own markdown section headers, so length varies naturally (in practice: 178–549 characters, 317 on average across 88 chunks from 14 documents).
+**Chunk size:** 
+     Not a fixed size — chunks follow the document's own markdown section headers, so length varies naturally (in practice: 178–549 characters, 317 on average across 88 chunks from 14 documents).
 
 **Overlap:** None.
 
@@ -145,16 +146,12 @@ a minor injuries unit locally with limited hours.
      visible. Milestone 4. -->
 
 **Question:**
-    ``` 
     "What is mill building turned into?" 
-    ```
 
 **Answer:**
-    ```
      Based on the provided documents, the mill building in Brightwater is now a museum (source: `guide_brightwater.md`).
 
      Sources retrieved: guide_brightwater.md, guide_givens_mill.md
-     ```
 
 **My relevance cutoff:**
 
@@ -166,9 +163,7 @@ a minor injuries unit locally with limited hours.
      here — the table below wants all ten rows.
 
      Milestone 4. -->
-     ```
      I ran my five in-corpus test questions and the five OUT_OF_SCOPE questions and recorded the best distance for each. The in-corpus questions all landed between 0.370 and 0.586, and the out-of-scope questions all landed between 0.813 and 0.975 — a clean gap with no overlap. I set the cutoff at 0.6 (the starter default), which sits comfortably in that gap: high enough that none of my real questions get refused, low enough that none of the out-of-scope questions get answered.
-     ```
 
 | Question | In corpus? | Best distance |
 |---|---|---|
@@ -195,8 +190,28 @@ a minor injuries unit locally with limited hours.
      Milestone 5. -->
 
 **1.**
+     **Chunking function.** I shared a sample document (Pellew Sands)
+     with Claude and asked for a chunking function to replace the fixed-800-char
+     starter. It first suggested a header-plus-paragraph-fallback approach with a
+     MIN_CHUNK/MAX_CHUNK size check, but that was more complex than my documents
+     actually needed — my guides are short, clean markdown with headers and no
+     oversized sections. Once I showed it a real document, it simplified to a pure
+     header-split function. I ran it and hit a `TypeError` because `Chunk` needed
+     `index` and `produced_by` fields the draft hadn't included — I had to paste
+     the actual error back before the function would run at all.
+
 
 **2.**
+     **Setting the relevance cutoff.** I ran my 5 in-corpus and 5
+     out-of-scope test questions myself and pasted the raw terminal output (with
+     distances) to Claude. Rather than picking a number for me outright, it read
+     the two groups (0.370–0.586 vs. 0.813–0.975), pointed out the gap between
+     them, and confirmed the starter's default of 0.6 already sat safely inside
+     it — so I kept the default instead of guessing at a new number. I also
+     initially flagged one question ("Where is Marine Terrace located?") as a
+     possible failure because the answer only cited a filename, not the town
+     name in prose — Claude helped me see that was a wording issue in my own
+     question/expected-answer check, not a retrieval or grounding problem.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
