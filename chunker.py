@@ -26,6 +26,7 @@ from dataclasses import dataclass
 
 import config
 from ingest import Document
+import re
 
 
 @dataclass
@@ -82,22 +83,40 @@ def fallback_split(
 
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    Split city guide documents into chunks along markdown section headers.
 
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
+    Rationale: city_guides docs are structured as a title (#) followed by
+    labeled sections (## Getting there, ## Eat and drink, etc.), each
+    covering exactly one topic in 150-500 characters. The starter's fixed
+    800-char window ignored these boundaries and cut mid-section. Since each
+    section is already a self-contained, complete thought, the natural chunk
+    boundary is the header itself — one section becomes one chunk.
 
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
-
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+    The document title (# Heading) carries no standalone content, so it's
+    prepended to the first section rather than becoming its own chunk.
     """
-    return fallback_split(documents)
+    chunks = []
+
+    for doc in documents:
+        parts = re.split(r'\n(?=#{1,2}\s)', doc.text.strip())
+        parts = [p.strip() for p in parts if p.strip()]
+
+        if not parts:
+            continue
+
+        if parts[0].startswith("# ") and not parts[0].startswith("## ") and len(parts) > 1:
+            parts[1] = parts[0] + "\n\n" + parts[1]
+            parts = parts[1:]
+
+        for i, part in enumerate(parts):
+            chunks.append(Chunk(
+                text=part,
+                source=doc.source,
+                index=i,
+                produced_by="chunker.py::split_documents",
+            ))
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:

@@ -26,11 +26,42 @@
      this repo.
 
      Milestone 5. -->
+     This is a retrieval-augmented question-answering system built on a corpus of
+     14 UK seaside town guides (`city_guides`). Each guide covers one town across
+     a consistent set of sections — getting there, getting around, eating and
+     drinking, sightseeing, accommodation, timing a visit, and practical notes.
+     The system answers questions like "where should I stay in Pellew Sands?" or
+     "how do I get around without a car?" by retrieving the relevant section(s)
+     and generating an answer grounded in them, with the source guide named.
 
 ## Chunking Strategy
 
-**Chunk size:**
-**Overlap:**
+**Chunk size:** Not a fixed size — chunks follow the document's own markdown section headers, so length varies naturally (in practice: 178–549 characters, 317 on average across 88 chunks from 14 documents).
+
+**Overlap:** None.
+
+     The starter's fixed 800-character window barely touched this corpus (docs
+     average ~2,068 characters, so it produced only 51 chunks) but where it did
+     cut, it sliced straight through the middle of a section — pairing the tail
+     of "Eat and drink" with the head of "What to see" in the same chunk.
+
+     When I read the actual documents in Milestone 1, I noticed each guide is
+     already organized into clearly labeled, single-topic sections (`## Getting
+     there`, `## Where to stay`, etc.), each running roughly 150–500 characters —
+     short enough to stay focused, long enough to stand alone. That structure is
+     a better chunk boundary than any character count I could have picked, so I
+     split on the markdown headers instead: one section becomes one chunk, with
+     the document title folded into the first section rather than becoming an
+     orphan chunk of its own.
+
+     I didn't add overlap because each section is already self-contained — a
+     question about "getting around" doesn't need trailing context from "getting
+     there" to be answered, so overlap would only add noise rather than missing
+     context.
+
+     I didn't need a fallback for oversized or undersized sections in practice:
+     the longest chunk (549 characters) is still one topic, not several, and the
+     shortest (178 characters) is a complete section, not a fragment.
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
      long sectioned guides don't want the same chunking, and "800 seemed
@@ -52,30 +83,60 @@
      across.
 
      Milestone 3. -->
-
-**Chunk 1** — source: `` — produced by: ``
-
 ```
-```
+======================================================================
+Chunk 1  |  source: guide_accessibility.md#0  |  produced by: chunker.py::split_documents
+======================================================================
+# Getting around the region with limited mobility
 
-**Chunk 2** — source: `` — produced by: ``
+An honest assessment rather than a promotional one. Some of these places are
+difficult and it is better to know in advance.
 
-```
-```
+## Straightforward
 
-**Chunk 3** — source: `` — produced by: ``
+**Thornby Wells** is the easiest town in the region. It is flat, compact, and
+everything is within three minutes of everything else. Parking is free for two
+hours anywhere in town and the station is central. The pump room and gardens
+are level throughout.
 
-```
-```
+**Marchwood** has a modern tram network with level boarding on all four lines,
+running every 8 minutes on weekdays. The city museum and covered market are both
+step-free. The distances between districts are the main consideration.
 
-**Chunk 4** — source: `` — produced by: ``
+**Brightwater** is level along the river and through the centre. The mill museum
+is step-free. The station is a 15-minute walk from campus on flat ground, or the
+shuttle meets the four busiest arrivals.
 
-```
-```
+======================================================================
+Chunk 2  |  source: guide_corry_vale.md#5  |  produced by: chunker.py::split_documents
+======================================================================
+## When to go
 
-**Chunk 5** — source: `` — produced by: ``
+May to September. Outside those months the pub in the third village closes, the farm shop reduces its hours, and several footpaths becomegenuinely boggy rather than merely wet. The road is not gritted above the second village and is impassable in snow.
 
-```
+======================================================================
+Chunk 3  |  source: guide_givens_mill.md#2  |  produced by: chunker.py::split_documents
+======================================================================
+## Eat and drink
+
+A tearoom attached to the mill, open 10 to 4 daily except Tuesdays, which sells bread made from the flour ground twenty metres away and is the reason most people come. One pub, food served lunchtimes and Thursday to Saturday evenings.
+
+======================================================================
+Chunk 4  |  source: guide_kestrelford.md#4  |  produced by: chunker.py::split_documents
+======================================================================
+## Where to stay
+
+Two inns on the square and a handful of rooms above the pubs. Booking ahead matters between May and September and not at all otherwise. There is no accommodation of any kind within four miles of the town in either direction.
+
+======================================================================
+Chunk 5  |  source: guide_pellew_sands.md#6  |  produced by: chunker.py::split_documents
+======================================================================
+## Practical notes
+
+Cash is still useful at the market and in smaller places, though cards are
+accepted almost everywhere now. Mobile coverage is good in the centre and
+patchy on the outskirts. The nearest full hospital is in Brightwater; there is
+a minor injuries unit locally with limited hours.
 ```
 
 ## Sample Answer
