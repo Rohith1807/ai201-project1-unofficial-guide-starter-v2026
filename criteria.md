@@ -22,9 +22,12 @@ pipeline earns credit; *"80% seemed reasonable"* does not.
 For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
-**Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+**Why this target:** My city_guides documents are short and section-based
+(150-500 characters per section), so most single-fact questions map cleanly
+onto one section. I expect 4 of 5 to be easy. The one I'd flag as harder is
+anything that spans two sections (e.g. comparing "getting around" and "where
+to stay" for the same town) — a single-chunk retrieval might miss half of
+that answer, which is why I'm not claiming 5 of 5.
 
 ---
 
@@ -32,9 +35,13 @@ contains the answer.
 
 Every answer the system produces names at least one source document.
 
-**Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+**Why this target:** This one is achievable at 100% because it's enforced in
+the code, not left to chance. The `GROUNDING_INSTRUCTION` system prompt
+explicitly requires the model to name the source filename in every answer,
+and every retrieved chunk is already tagged with its source before it reaches
+the prompt. The only way this fails is if the model ignores an explicit
+instruction it's given every single time, which is a much narrower failure
+mode than "did retrieval happen to find the right chunk."
 
 ---
 
@@ -44,14 +51,13 @@ When I ask a question my documents clearly don't cover, the relevance gate
 stops it and the system returns "I don't have enough information about that" —
 in at least 4 of 5 tries.
 
-<!-- The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
-     `questions.py`, and `run_eval.py` puts them through the gate and writes
-     what happened into your run log. Swap them for your own if you'd rather —
-     just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
-
-**Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+**Why this target:** When I ran my 5 in-corpus and 5 out-of-scope questions in
+Milestone 4, the best distances split into two clean, non-overlapping groups:
+0.370-0.586 for in-corpus questions and 0.813-0.975 for out-of-scope ones. With
+a gap that wide (roughly 0.23 between the closest pair), a cutoff of 0.6 sitting
+in the middle should catch all 5 out-of-scope questions reliably, not just 4 —
+but I'm keeping the target at 4/5 rather than 5/5 in case a future off-topic
+question happens to share more vocabulary with my corpus than these five did.
 
 ---
 
@@ -61,7 +67,7 @@ At least 80% of retrieved chunks are between 100 and 300 words long.
 
 **Why this target:**
 
-<!-- I chose 100 to 300 words because shorter chunks may not provide enough context, while longer chunks may include unnecessary information. The 80% threshold allows for some variation in document structure. -->
+I chose 100 to 300 words because shorter chunks may not provide enough context, while longer chunks may include unnecessary information. The 80% threshold allows for some variation in document structure.
 
 ---
 
@@ -69,22 +75,15 @@ At least 80% of retrieved chunks are between 100 and 300 words long.
 
 For at least 4 of my 5 test questions, the generated answer contains the expected phrase defined in questions.py.
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
-
-**Why this target:**
-
-<!-- I chose 4 out of 5 because retrieval systems are not perfect, but the system should successfully answer most questions and include the key information expected from the source documents. -->
-
-
----
+**Why this target:** I chose 4 out of 5 because retrieval systems are not
+perfect, but the system should successfully answer most questions and include
+the key information expected from the source documents. The one place I'd
+expect this to slip is phrasing mismatches rather than retrieval failures —
+for example, my own "Marine Terrace" question expected the literal string
+"Pellew Sands" in the answer, but the model correctly cited the source as
+`guide_pellew_sands.md` instead of writing the town name in prose. That's a
+wording gap in my expected-phrase check, not a grounding or retrieval failure,
+which is exactly the kind of near-miss I'd want this criterion to surface.
 
 <!-- ─────────────────────────────────────────────────────────────────────────
      UNIT 2 — read this before you change anything above.
