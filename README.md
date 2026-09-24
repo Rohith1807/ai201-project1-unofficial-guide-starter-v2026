@@ -417,17 +417,31 @@ and grounding both worked correctly.
 
 ## What's Still Broken
 
-<!-- For each criterion still missed after your fix: what you'd do about it,
-     and why you stopped where you did.
-
-     "I ran out of time" is fine if it's true. Pretending nothing is left is
-     not.
-
-     Milestone 5. -->
+Every one of my five criteria is MET after the fix.
 
 ## What I'd Do Differently
 
-<!-- Knowing what you know now — which of your five criteria would you write
-     differently, and why?
+**Criterion 5** is the one I'd write differently from the start. My original
+version ("the answer contains the expected phrase") didn't anticipate that
+my own grounding instruction would make the model cite sources by filename,
+which meant my first test question technically failed for a reason that had
+nothing to do with retrieval or generation quality. Next time I'd write the
+target more precisely up front — something like "the answer contains the
+expected phrase as a standalone word, not only inside a citation" — so I'm
+not discovering the ambiguity after the fact and patching it with scorer
+logic.
 
-     Milestone 5. -->
+**Criterion 3** I'd keep the same shape but widen the test set. 5 out-of-scope
+questions gave me a comfortable margin, but I'd want at least 10-15 next time,
+deliberately including a few "near-miss" topics adjacent to my corpus (e.g. a
+question about a different UK town not in my guides) to actually find where
+the gate's edge is, rather than only testing questions from a completely
+different world.
+
+**Criterion 4** I'd tie to something the system actually needs, not just a
+descriptive stat. Knowing 100% of chunks are 30-150 words is nice to know,
+but it doesn't by itself tell me whether that length is helping or hurting
+answers. A better version might connect chunk length to criterion 1 directly
+— e.g. "of the chunks outside the typical range, do they still contain
+complete answers?" — so the criterion says something about outcomes, not
+just shape.
