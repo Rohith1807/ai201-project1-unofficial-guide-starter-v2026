@@ -226,13 +226,64 @@ a minor injuries unit locally with limited hours.
 
      Milestone 1. -->
 
-| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
-|---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+     | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+     |---|---|---|---|---|---|
+     | 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+     | 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+     | 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+     | 4. 80% of chunks between 30-150 words | 80% | 100% | 100% | 100% | MET |
+     | 5. Answer contains expected phrase | 4 of 5 | 4/5 | 4/5 | 4/5 | MET |
+
+     ## Real Output
+
+### Criterion 1 — Retrieved chunk contains the answer
+Produced by `store.py::search` (chunks from `chunker.py::split_documents`)
+
+Question: "What is mill building turned into?"
+Best distance: 0.4654
+Sources retrieved: guide_accessibility.md, guide_brightwater.md, guide_givens_mill.md
+
+Retrieved chunk (guide_brightwater.md):
+"## What to see  The mill building itself is now a museum..."
+
+### Criterion 2 — Every answer names a source
+Produced by `generate.py::answer_from_chunks`
+
+Question: "What is mill building turned into?"
+
+"The mill building is now a museum (source: guide_brightwater.md)."
+
+### Criterion 3 — Gate stops out-of-corpus questions
+Produced by `run_eval.py::check_out_of_scope` (gate logic in `gate.py`)
+
+Question: "What is the capital of Mongolia?"
+Best distance: 0.827 (cutoff 0.6)
+
+"I don't have enough information about that."
+
+### Criterion 4 — Chunk word length
+Produced by `check_chunk_lengths.py`, reading the `city_guides__default` collection via `store.py`
+
+Collection: city_guides__default
+Total chunks: 84
+In range [30, 150] words: 84 (100.0%)
+Shortest: 30 words
+Longest: 146 words
+Average: 60.3 words
+
+### Criterion 5 — Answer contains expected phrase
+Produced by `generate.py::answer_from_chunks`
+
+Question: "Where is Marine Terrace located?"
+Expected phrase: "Pellew Sands"
+
+"Marine Terrace is located one street back from the seafront.
+Source: guide_pellew_sands.md (also mentioned in guide_eating.md)"
+
+This is the one question where the expected phrase never appears — the
+model correctly cites the source file but never writes "Pellew Sands" as
+a place name in prose, so this run fails the check even though retrieval
+and grounding both worked correctly.
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
