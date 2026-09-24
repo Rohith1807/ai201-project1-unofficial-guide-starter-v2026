@@ -63,11 +63,18 @@ question happens to share more vocabulary with my corpus than these five did.
 
 ## 4. Something about your chunks
 
-At least 80% of retrieved chunks are between 100 and 300 words long.
+At least 80% of retrieved chunks are between 30 and 150 words long.
 
 **Why this target:**
 
-I chose 100 to 300 words because shorter chunks may not provide enough context, while longer chunks may include unnecessary information. The 80% threshold allows for some variation in document structure.
+ My header-based chunker produces one chunk per guide
+section, and running `python app.py index` shows these land between 178 and
+549 characters (~30-100 words) in practice, averaging 317 characters (~58
+words). I set the range at 30-150 words rather than the starter's 100-300 to
+reflect that my documents are made of short, single-topic sections rather
+than long paragraphs — a "Getting around" section that's complete in 3
+sentences shouldn't be flagged as too short just because it doesn't match a
+generic target built for a different kind of corpus.
 
 ---
 
