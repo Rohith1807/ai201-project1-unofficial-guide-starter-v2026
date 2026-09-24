@@ -302,11 +302,31 @@ and grounding both worked correctly.
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunks contain the answer (4 of 5) | MET | All three runs scored 5/5 — every question's retrieved chunks contained the literal answer, not just related material, with no exceptions across runs. |
+| 2 | Every answer names a source (5 of 5) | MET | All three runs scored 5/5, which is expected since GROUNDING_INSTRUCTION requires a source filename in every prompt, not left to chance. |
+| 3 | Gate stops out-of-corpus questions (4 of 5) | MET | Refused 5/5 in a single deterministic pass; the best out-of-scope distance (0.813) sits well clear of the 0.6 cutoff, so it's not a borderline result. |
+| 4 | 80% of chunks between 30-150 words | MET | 100% of my 84 stored chunks fell in range (measured via check_chunk_lengths.py), with shortest (30) and longest (146) both comfortably inside the bounds. |
+| 5 | Answer contains expected phrase (4 of 5) | MET | All three runs scored exactly 4/5 — the "Marine Terrace" question failed every time because the model names the source as a filename rather than writing "Pellew Sands" in prose; see revision below. |
+
+### Revision — Criterion 5
+
+     **Original:** For at least 4 of my 5 test questions, the generated answer
+     contains the expected phrase defined in questions.py.
+
+     **Problem:** My expected phrase for "Where is Marine Terrace located?" was
+     "Pellew Sands," but the system is instructed by GROUNDING_INSTRUCTION to
+     name sources by filename, so it consistently answers with
+     `guide_pellew_sands.md` instead of writing the town name in prose. This
+     isn't the model failing to find the answer — it's my expected-phrase check
+     not accounting for the system's own citation format.
+
+     **Revised:** For at least 4 of 5 test questions, the generated answer
+     contains the expected phrase, accepting the source filename as a valid
+     match when the expected phrase is a place name that also appears in a
+     guide's filename (e.g. "Pellew Sands" or "pellew_sands" both count).
+
+     **Result under revision:** 5/5 in all three runs.
+
 
 ## Diagnoses
 
@@ -328,36 +348,72 @@ and grounding both worked correctly.
 
      Milestone 3. -->
 
+     I didn't miss any criterion — all five came out MET across all three runs
+     (see Milestone 2 verdicts table). So there's no pipeline failure to trace
+     through loading, chunking, embedding, retrieval, or generation.
+
+     **Honest check on whether my targets were too easy:**
+
+     Criteria 2, 3, and 4 were met with wide margin (100% or 5/5 against targets
+     of 5/5, 4/5, and 80%), and each is either enforced by design (the grounding
+     instruction requires a source in every prompt) or backed by a clean, wide
+     numerical gap (out-of-scope distances 0.813-0.975 vs. a 0.6 cutoff; chunk
+     lengths 30-146 words comfortably inside a 30-150 range). I don't think these
+     three were set low — they're just genuinely well-suited to a small, clean,
+     well-structured corpus like mine.
+
+     Criterion 5 is the one I'd tighten. My original expected-phrase check turned
+     out to be too forgiving of my own test design: the "Marine Terrace" question
+     passed on a technicality (the source filename `guide_pellew_sands.md`
+     contains "pellew_sands", which I allowed as a match after the fact) rather
+     than the model demonstrating it actually surfaced the town name as a fact,
+     not just a citation. A tighter version of this criterion would require the
+     expected phrase to appear in the answer's prose sentence, separate from the
+     source citation line — that would test whether the model synthesizes the
+     answer, not just whether it names the right file. I suspect that stricter
+     version would still pass, since the underlying retrieval and grounding are
+     solid, but I haven't actually tested it that way, so I can't claim it as MET
+     under the tighter definition.
+
 ## The Improvement
 
-**What I changed:**
+     **What I changed:** Added one line to `GROUNDING_INSTRUCTION` in
+     `generate.py`, instructing the model to name the place or topic in plain
+     language in the answer text, not just cite the source filename.
 
-**Why I picked it:**
+     **Why I picked it:** My Milestone 3 diagnosis found that criterion 5 passed
+     "Where is Marine Terrace located?" only after I loosened my expected-phrase
+     check to accept the source filename (`guide_pellew_sands.md`) as a match for
+     "Pellew Sands" — the model itself never wrote the town name in prose, which
+     meant the underlying gap (generation not surfacing the answer in readable
+     form) was still there even though the loosened test passed.
 
-<!-- Connect it to a specific diagnosis above in one sentence. If you can't,
-     you picked a fix because it sounded impressive. -->
+     ### Run Log — After
 
-### Run Log — After
+     | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+     |---|---|---|---|---|---|
+     | 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+     | 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+     | 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+     | 4. 80% of chunks between 30-150 words | 80% | 100% | 100% | 100% | MET |
+     | 5. Answer contains expected phrase | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 
-<!-- Same format, same five criteria, three runs each.
-     `python run_eval.py --label after` -->
+     **Did it help?** Yes. Criterion 5 moved from a consistent 4/5 (all three
+     before-runs) to a consistent 5/5 (all three after-runs), with criteria 1-4
+     completely unchanged — expected, since the fix only touched the grounding
+     prompt, not chunking, retrieval, or the relevance gate. All five best
+     distances (0.465, 0.370, 0.442, 0.474, 0.586) are identical before and after,
+     confirming retrieval itself never moved; only generation did.
 
-| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
-|---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
-
-**Did it help?**
-
-<!-- Say plainly whether it did, and how you know. If it made things worse,
-     say that — a change that backfired, honestly reported, earns full credit
-     and is more interesting than one that worked. What matters is that you can
-     tell.
-
-     Milestone 4. -->
+     Importantly, this isn't just the scorer being more lenient. The actual
+     answer text for "Where is Marine Terrace located?" changed from citing only
+     `guide_pellew_sands.md` to explicitly stating "...located one street back
+     from the seafront in Pellew Sands." That passes even the original, stricter
+     phrase-match definition (looking for the literal text "Pellew Sands"), not
+     just the loosened filename-matching version I'd built into scorer.py as a
+     workaround. So the fix addressed the real gap identified in Milestone 3 —
+     the model synthesizing the answer into readable prose — rather than the
+     improvement being an artifact of a more forgiving test.
 
 ## What's Still Broken
 
